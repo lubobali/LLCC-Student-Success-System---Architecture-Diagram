@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLCC AI Analytics Agent - Architecture v4.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f1a 0%, #1a2744 30%, #0d253f 70%, #0a1628 100%);
+            min-height: 100vh;
+            padding: 30px;
+            font-size: 115%; /* 15% bigger base for all text */
+        }
+        .container {
+            max-width: 1450px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfc 50%, #f5f7fa 100%);
+            border-radius: 28px;
+            box-shadow: 
+                0 40px 80px rgba(0,0,0,0.5),
+                0 0 120px rgba(102, 126, 234, 0.2),
+                0 0 200px rgba(139, 92, 246, 0.1),
+                inset 0 1px 0 rgba(255,255,255,1);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* ULTRA LUXURY HEADER */
+        .header {
+            background: linear-gradient(135deg, #1B3A5F 0%, #0d2137 30%, #162d50 60%, #1a4a7a 100%);
+            color: white;
+            padding: 55px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.6;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255,215,0,0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            text-shadow: 0 3px 15px rgba(0,0,0,0.4);
+            position: relative;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+        .header-logo {
+            height: 70px;
+            width: auto;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .header p {
+            opacity: 0.95;
+            font-size: 23px;
+            font-weight: 500;
+            position: relative;
+            letter-spacing: 0.5px;
+        }
+        .header p.subtitle {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .header .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700 0%, #f59e0b 50%, #ffb347 100%);
+            color: #1B3A5F;
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 18px;
+            box-shadow: 
+                0 6px 20px rgba(255, 215, 0, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .header .internal-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(15px);
+            padding: 10px 26px;
+            border-radius: 30px;
+            font-size: 15px;
+            margin-top: 16px;
+            margin-left: 12px;
+            border: 1px solid rgba(255,255,255,0.25);
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 55px;
+        }
+        .architecture {
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e8eef5 100%);
+            border-radius: 24px;
+            padding: 45px;
+            margin-bottom: 35px;
+            box-shadow: 
+                inset 0 2px 15px rgba(0,0,0,0.06),
+                inset 0 -1px 0 rgba(255,255,255,0.8);
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            border-radius: 22px;
+            padding: 32px;
+            position: relative;
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.1),
+                0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .section:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.15),
+                0 5px 20px rgba(0,0,0,0.08);
+        }
+        .section-label {
+            position: absolute;
+            top: -18px;
+            left: 32px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            padding: 7px 22px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,1);
+        }
+        
+        /* CRITICAL NOTE - ULTRA LUXURY ORANGE */
+        .critical-note {
+            background: linear-gradient(135deg, #fffaf5 0%, #fff3e8 30%, #ffedd5 60%, #fed7aa 100%);
+            border: 3px solid #f97316;
+            border-radius: 22px;
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: 
+                0 12px 40px rgba(249, 115, 22, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                0 0 60px rgba(249, 115, 22, 0.1);
+        }
+        .critical-note h3 {
+            color: #c2410c;
+            margin-bottom: 16px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .critical-note p {
+            color: #9a3412;
+            font-size: 18px;
+            line-height: 1.9;
+        }
+        
+        /* DATA SOURCES - ULTRA LUXURY CYAN */
+        .data-sources {
+            background: linear-gradient(135deg, #f0fdff 0%, #e0f7fa 30%, #b2ebf2 70%, #80deea 100%);
+            border: 2px solid #06b6d4;
+            box-shadow: 
+                0 10px 40px rgba(6, 182, 212, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .data-sources .section-label {
+            color: #0891b2;
+            border: 2px solid #06b6d4;
+            background: linear-gradient(180deg, #ffffff 0%, #ecfeff 100%);
+        }
+        .sources-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 26px;
+            margin-top: 26px;
+        }
+        .source-card {
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 20px;
+            padding: 28px;
+            text-align: center;
+            box-shadow: 
+                0 8px 30px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,1);
+            transition: all 0.4s ease;
+        }
+        .source-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.18),
+                inset 0 1px 0 rgba(255,255,255,1);
+        }
+        .source-card.canvas { 
+            border-top: 7px solid #0077b6;
+            background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+        }
+        .source-card.surveys { 
+            border-top: 7px solid #10b981;
+            background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+        }
+        .source-card.alumni { 
+            border-top: 7px solid #ef4444;
+            background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+        }
+        .source-icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        .source-title {
+            font-weight: 800;
+            font-size: 20px;
+            margin-bottom: 14px;
+            color: #1e293b;
+            letter-spacing: 0.5px;
+        }
+        .source-items {
+            font-size: 17px;
+            color: #475569;
+            line-height: 2;
+        }
+        .source-note {
+            font-size: 15px;
+            color: #64748b;
+            margin-top: 14px;
+            font-style: italic;
+            padding-top: 14px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        /* ARROW - ULTRA LUXURY */
+        .arrow {
+            text-align: center;
+            padding: 28px 0;
+            font-size: 50px;
+        }
+        .arrow span {
+            display: inline-block;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.4));
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* ORCHESTRATION - ULTRA LUXURY AMBER */
+        .orchestration {
+            background: linear-gradient(135deg, #fffdf5 0%, #fef3c7 30%, #fde68a 70%, #fcd34d 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 
+                0 10px 40px rgba(245, 158, 11, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .orchestration .section-label {
+            color: #d97706;
+            border: 2px solid #f59e0b;
+            background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+        }
+        .airflow-box {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 34px;
+            margin-top: 26px;
+            text-align: center;
+            box-shadow: 
+                0 12px 40px rgba(245, 158, 11, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .airflow-box h3 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+        .airflow-tasks {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 17px;
+        }
+        .airflow-task {
+            background: rgba(255,255,255,0.25);
+            padding: 14px 22px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .airflow-task:hover {
+            background: rgba(255,255,255,0.35);
+            transform: scale(1.05);
+        }
+        
+        /* DATABASE - ULTRA LUXURY EMERALD */
+        .database {
+            background: linear-gradient(135deg, #f0fdf8 0%, #d1fae5 30%, #a7f3d0 70%, #6ee7b7 100%);
+            border: 2px solid #10b981;
+            box-shadow: 
+                0 10px 40px rgba(16, 185, 129, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .database .section-label {
+            color: #059669;
+            border: 2px solid #10b981;
+            background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
+        }
+        .db-ownership {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 17px;
+            font-weight: 700;
+            margin-top: 16px;
+            margin-bottom: 26px;
+            box-shadow: 
+                0 6px 25px rgba(5, 150, 105, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            letter-spacing: 0.5px;
+        }
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+        }
+        .table-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border-left: 6px solid #10b981;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,1);
+            transition: all 0.4s ease;
+        }
+        .table-card:hover {
+            transform: scale(1.05) translateY(-4px);
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,1);
+        }
+        .table-icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .table-name {
+            font-weight: 800;
+            font-size: 15px;
+            color: #059669;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        .table-fields {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.8;
+        }
+        
+        /* AI ENGINE - ULTRA LUXURY PURPLE */
+        .ai-engine {
+            background: linear-gradient(135deg, #fdfaff 0%, #f3e8ff 30%, #e9d5ff 70%, #d8b4fe 100%);
+            border: 2px solid #a855f7;
+            box-shadow: 
+                0 10px 40px rgba(168, 85, 247, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .ai-engine .section-label {
+            color: #9333ea;
+            border: 2px solid #a855f7;
+            background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+        }
+        .ai-box {
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 30%, #6d28d9 70%, #5b21b6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 34px;
+            margin-top: 26px;
+            box-shadow: 
+                0 12px 40px rgba(147, 51, 234, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                0 0 80px rgba(147, 51, 234, 0.15);
+        }
+        .ai-box h4 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+        .ai-recommendation {
+            background: rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 18px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .ai-recommendation .badge {
+            background: linear-gradient(135deg, #ffd700 0%, #f59e0b 50%, #ffb347 100%);
+            color: #1e293b;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            margin-right: 14px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+            letter-spacing: 1px;
+        }
+        .ai-recommendation strong {
+            font-size: 20px;
+        }
+        .ai-recommendation .desc {
+            font-size: 17px;
+            opacity: 0.95;
+            margin-top: 10px;
+            display: block;
+            line-height: 1.6;
+        }
+        .ai-future {
+            font-size: 17px;
+            opacity: 0.95;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            line-height: 1.7;
+        }
+        .ai-flow {
+            background: rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 18px;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        /* USER INTERFACE - ULTRA LUXURY BLUE */
+        .user-interface {
+            background: linear-gradient(135deg, #f5f9ff 0%, #dbeafe 30%, #bfdbfe 70%, #93c5fd 100%);
+            border: 2px solid #3b82f6;
+            box-shadow: 
+                0 10px 40px rgba(59, 130, 246, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .user-interface .section-label {
+            color: #2563eb;
+            border: 2px solid #3b82f6;
+            background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+        }
+        .internal-badge-section {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+            color: white;
+            padding: 12px 26px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 16px;
+            margin-bottom: 26px;
+            box-shadow: 
+                0 6px 25px rgba(220, 38, 38, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            letter-spacing: 0.5px;
+        }
+        .ui-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 26px;
+        }
+        .ui-card {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+            color: white;
+            border-radius: 22px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 
+                0 12px 40px rgba(37, 99, 235, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.4s ease;
+        }
+        .ui-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 25px 60px rgba(37, 99, 235, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .ui-icon {
+            font-size: 52px;
+            margin-bottom: 14px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        .ui-title {
+            font-weight: 800;
+            font-size: 22px;
+            margin-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+        .ui-features {
+            text-align: left;
+            font-size: 17px;
+            line-height: 2.2;
+        }
+        .ui-features li {
+            list-style: none;
+            padding-left: 30px;
+            position: relative;
+        }
+        .ui-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #86efac;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* TEACHER MODAL PREVIEW */
+        .modal-preview {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 22px;
+            padding: 34px;
+            margin-top: 32px;
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,1);
+            border: 3px solid #3b82f6;
+        }
+        .modal-preview h4 {
+            color: #1d4ed8;
+            font-size: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .modal-content {
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 28px;
+            font-size: 17px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .modal-btn {
+            background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            padding: 14px 22px;
+            font-size: 16px;
+            color: #1d4ed8;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .modal-btn.selected {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        .modal-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        /* ALUMNI FLOW - ULTRA LUXURY ROSE */
+        .alumni-flow {
+            background: linear-gradient(135deg, #fff5f6 0%, #fecdd3 30%, #fda4af 70%, #fb7185 100%);
+            border: 2px solid #f43f5e;
+            border-radius: 22px;
+            padding: 34px;
+            margin-top: 32px;
+            box-shadow: 
+                0 12px 40px rgba(244, 63, 94, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .alumni-flow h4 {
+            color: #be123c;
+            margin-bottom: 26px;
+            font-size: 22px;
+        }
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .flow-step {
+            background: linear-gradient(180deg, #ffffff 0%, #fff5f6 100%);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            flex: 1;
+            min-width: 180px;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,1);
+            transition: all 0.4s ease;
+        }
+        .flow-step:hover {
+            transform: scale(1.05) translateY(-4px);
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,1);
+        }
+        .flow-step-icon {
+            font-size: 42px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .flow-step-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: #be123c;
+        }
+        .flow-step-desc {
+            font-size: 15px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+        .flow-arrow {
+            font-size: 34px;
+            color: #f43f5e;
+            filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.3));
+        }
+        
+        /* COST SECTION - ULTRA LUXURY EMERALD */
+        .cost-section {
+            background: linear-gradient(135deg, #f0fdf8 0%, #d1fae5 30%, #a7f3d0 70%, #6ee7b7 100%);
+            border: 2px solid #10b981;
+            border-radius: 22px;
+            padding: 34px;
+            margin-top: 32px;
+            box-shadow: 
+                0 12px 40px rgba(16, 185, 129, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .cost-section h4 {
+            color: #047857;
+            margin-bottom: 26px;
+            font-size: 24px;
+        }
+        .cost-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 8px 30px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,1);
+            max-width: 500px;
+            margin: 0 auto;
+            border: 3px solid #10b981;
+            position: relative;
+        }
+        .cost-card::before {
+            content: '⭐ RECOMMENDED FOR PILOT';
+            position: absolute;
+            top: -14px;
+            left: 24px;
+            background: linear-gradient(135deg, #ffd700 0%, #f59e0b 50%, #ffb347 100%);
+            color: #1e293b;
+            padding: 6px 18px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+        .cost-card h5 {
+            color: #047857;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #d1fae5;
+            text-align: center;
+        }
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 17px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cost-item:last-of-type {
+            border-bottom: none;
+        }
+        .cost-item .service {
+            color: #475569;
+        }
+        .cost-item .price {
+            font-weight: 800;
+            color: #047857;
+        }
+        .cost-total {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+            color: white;
+            padding: 20px 28px;
+            border-radius: 16px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 22px;
+            box-shadow: 
+                0 6px 25px rgba(5, 150, 105, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .cost-note {
+            font-size: 17px;
+            color: #475569;
+            margin-top: 28px;
+            text-align: center;
+            padding: 22px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            line-height: 1.8;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        /* TECH STACK - ULTRA LUXURY DARK */
+        .tech-stack {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #020617 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-top: 32px;
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .tech-stack h4 {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+            text-align: center;
+        }
+        .tech-items {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 17px;
+        }
+        .tech-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%);
+            padding: 12px 22px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.4s ease;
+            font-weight: 500;
+        }
+        .tech-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        /* FOOTER - ULTRA LUXURY */
+        .footer {
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            padding: 40px 60px;
+            text-align: center;
+            color: #334155;
+            font-size: 19px;
+            border-top: 2px solid #e2e8f0;
+        }
+        .footer-contact {
+            margin-top: 14px;
+            font-size: 17px;
+            color: #64748b;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .footer a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+            .sources-grid, .ui-grid {
+                grid-template-columns: 1fr;
+            }
+            .tables-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .flow-steps {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+        @media (max-width: 600px) {
+            .tables-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            body {
+                padding: 15px;
+            }
+            .content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><img src="logo-llcc.png" alt="LLCC Logo" class="header-logo"> LLCC AI Analytics Agent</h1>
+            <p class="subtitle">Student Success Tracking System</p>
+            <p>System Architecture Overview</p>
+            <span class="version-badge">VERSION 4.0</span>
+            <span class="internal-badge">🔒 Internal Tool for LLCC Staff Only</span>
+        </div>
+        
+        <div class="content">
+            <div class="architecture">
+                
+                <!-- CRITICAL NOTE -->
+                <div class="critical-note">
+                    <h3>⚠️ Critical Prerequisite: Canvas API Access</h3>
+                    <p>
+                        This system requires read-only API access to LLCC's Canvas instance. 
+                        Without Canvas API access, there is no data source to build analytics on. 
+                        LLCC's IT department would need to generate API credentials. This is FERPA-compliant 
+                        as we only read data LLCC already owns.
+                    </p>
+                </div>
+                
+                <!-- DATA SOURCES -->
+                <div class="section data-sources">
+                    <span class="section-label">📥 Data Sources</span>
+                    <div class="sources-grid">
+                        <div class="source-card canvas">
+                            <div class="source-icon">📚</div>
+                            <div class="source-title">CANVAS API</div>
+                            <div class="source-items">
+                                Grades & Attendance<br>
+                                Login Activity<br>
+                                Assignments<br>
+                                Course Enrollments
+                            </div>
+                            <div class="source-note">Automatic nightly sync</div>
+                        </div>
+                        <div class="source-card surveys">
+                            <div class="source-icon">📝</div>
+                            <div class="source-title">CANVAS SURVEYS</div>
+                            <div class="source-items">
+                                Entry Survey (Module 1)<br>
+                                Exit Survey (Final - Mandatory)<br>
+                                Career Goals<br>
+                                Personal Contact Info
+                            </div>
+                            <div class="source-note">Students fill in Canvas</div>
+                        </div>
+                        <div class="source-card alumni">
+                            <div class="source-icon">📧</div>
+                            <div class="source-title">ALUMNI FOLLOW-UP</div>
+                            <div class="source-items">
+                                6mo / 1yr / 2yr Surveys<br>
+                                Email Reminders<br>
+                                Employment Updates<br>
+                                No Login Required
+                            </div>
+                            <div class="source-note">Automated email system</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow"><span>⬇️</span></div>
+                
+                <!-- ORCHESTRATION -->
+                <div class="section orchestration">
+                    <span class="section-label">⚙️ Orchestration Layer</span>
+                    <div class="airflow-box">
+                        <h3>Apache Airflow - Automated Data Pipelines</h3>
+                        <div class="airflow-tasks">
+                            <span class="airflow-task">🌙 Nightly: Pull Canvas Data</span>
+                            <span class="airflow-task">📝 Nightly: Sync Survey Responses</span>
+                            <span class="airflow-task">📧 Daily: Send Alumni Follow-ups</span>
+                            <span class="airflow-task">📊 Monthly: Generate Reports</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow"><span>⬇️</span></div>
+                
+                <!-- DATABASE -->
+                <div class="section database">
+                    <span class="section-label">🗄️ LLCC Success Database</span>
+                    <div class="db-ownership">✅ LLCC OWNS THIS DATABASE (PostgreSQL)</div>
+                    <div class="tables-grid">
+                        <div class="table-card">
+                            <div class="table-icon">👤</div>
+                            <div class="table-name">STUDENTS</div>
+                            <div class="table-fields">name, program<br>email, phone<br>status</div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-icon">📊</div>
+                            <div class="table-name">CANVAS_DATA</div>
+                            <div class="table-fields">grades<br>attendance<br>activity</div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-icon">📝</div>
+                            <div class="table-name">SURVEYS</div>
+                            <div class="table-fields">career_goal<br>grad_plan<br>feedback</div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-icon">💼</div>
+                            <div class="table-name">EMPLOYMENT</div>
+                            <div class="table-fields">employer<br>job_title<br>in_field</div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-icon">📋</div>
+                            <div class="table-name">TEACHER_NOTES</div>
+                            <div class="table-fields">note_type<br>details<br>date</div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-icon">📞</div>
+                            <div class="table-name">FOLLOW_UPS</div>
+                            <div class="table-fields">contact_date<br>response<br>status</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow"><span>⬇️</span></div>
+                
+                <!-- AI ENGINE -->
+                <div class="section ai-engine">
+                    <span class="section-label">🤖 AI Analytics Agent</span>
+                    <div class="ai-box">
+                        <h4>Natural Language to Insights</h4>
+                        <div class="ai-recommendation">
+                            <span class="badge">⭐ PILOT</span>
+                            <strong>Groq API (Cloud)</strong>
+                            <span class="desc">Fast, reliable, no hardware needed - perfect for proving the concept</span>
+                        </div>
+                        <div class="ai-future">
+                            💡 <strong>Future Option:</strong> If pilot is successful and LLCC has server capacity, there are options to reduce ongoing costs by hosting locally.
+                        </div>
+                        <div class="ai-flow">
+                            <strong>How it works:</strong> Natural Language Question → Generate SQL → Query Database → Plain English Answer
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow"><span>⬇️</span></div>
+                
+                <!-- USER INTERFACE -->
+                <div class="section user-interface">
+                    <span class="section-label">🖥️ Internal Dashboard</span>
+                    <div class="internal-badge-section">🔒 LLCC STAFF ONLY - Students Never Access This</div>
+                    <div class="ui-grid">
+                        <div class="ui-card">
+                            <div class="ui-icon">👩‍🏫</div>
+                            <div class="ui-title">Teachers</div>
+                            <ul class="ui-features">
+                                <li>View own students</li>
+                                <li>Add notes (1-click modal)</li>
+                                <li>Basic class queries</li>
+                                <li>Track job placements</li>
+                            </ul>
+                        </div>
+                        <div class="ui-card">
+                            <div class="ui-icon">📋</div>
+                            <div class="ui-title">Program Directors</div>
+                            <ul class="ui-features">
+                                <li>Program-wide view</li>
+                                <li>At-risk student alerts</li>
+                                <li>AI queries for program</li>
+                                <li>Program reports</li>
+                            </ul>
+                        </div>
+                        <div class="ui-card">
+                            <div class="ui-icon">👔</div>
+                            <div class="ui-title">Admins / Deans</div>
+                            <ul class="ui-features">
+                                <li>Full AI queries</li>
+                                <li>Cross-program analytics</li>
+                                <li>Accreditation reports</li>
+                                <li>Export to Excel/PDF</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Teacher Modal Preview -->
+                    <div class="modal-preview">
+                        <h4>➕ Quick Note Entry (Teacher clicks [+] button - takes 30 seconds)</h4>
+                        <div class="modal-content">
+                            <strong>Add Note for: John Smith</strong>
+                            <div class="modal-buttons">
+                                <span class="modal-btn selected">💼 Job Offer</span>
+                                <span class="modal-btn">🎓 Internship</span>
+                                <span class="modal-btn">⚠️ At Risk</span>
+                                <span class="modal-btn">🏆 Achievement</span>
+                            </div>
+                            <input class="modal-input" placeholder="Employer: ABC Manufacturing" disabled>
+                            <input class="modal-input" placeholder="Notes: Got hired as welder, starts Monday..." disabled>
+                            <div style="text-align: right; margin-top: 20px;">
+                                <span style="background: #e2e8f0; padding: 12px 26px; border-radius: 12px; font-size: 16px; margin-right: 12px; cursor: pointer;">Cancel</span>
+                                <span style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 12px 26px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);">Save Note</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ALUMNI FLOW -->
+                <div class="alumni-flow">
+                    <h4>📧 Alumni Tracking Flow (Fully Automated)</h4>
+                    <div class="flow-steps">
+                        <div class="flow-step">
+                            <div class="flow-step-icon">🎓</div>
+                            <div class="flow-step-title">Graduation</div>
+                            <div class="flow-step-desc">Exit survey captures personal email</div>
+                        </div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">
+                            <div class="flow-step-icon">📧</div>
+                            <div class="flow-step-title">6 Months</div>
+                            <div class="flow-step-desc">Auto email with survey link</div>
+                        </div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">
+                            <div class="flow-step-icon">📝</div>
+                            <div class="flow-step-title">Alumni Clicks</div>
+                            <div class="flow-step-desc">Simple form, no login needed</div>
+                        </div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">
+                            <div class="flow-step-icon">💾</div>
+                            <div class="flow-step-title">Data Saved</div>
+                            <div class="flow-step-desc">Employment tracked in database</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- COST BREAKDOWN - SIMPLIFIED -->
+                <div class="cost-section">
+                    <h4>💰 Estimated Monthly Costs (Pilot Program)</h4>
+                    <div class="cost-card">
+                        <h5>Cloud-Based Pilot</h5>
+                        <div class="cost-item">
+                            <span class="service">Vultr Server (Chicago, 16GB)</span>
+                            <span class="price">$112/mo</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="service">Groq AI API</span>
+                            <span class="price">$100/mo</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="service">SendGrid Email</span>
+                            <span class="price">$20/mo</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="service">Backups & Storage</span>
+                            <span class="price">$15/mo</span>
+                        </div>
+                        <div class="cost-total">
+                            <span>TOTAL</span>
+                            <span>~$250/month</span>
+                        </div>
+                    </div>
+                    <p class="cost-note">
+                        💡 <strong>Future Investment:</strong> If the pilot is successful and LLCC has server infrastructure available, 
+                        there are options to reduce ongoing costs by hosting locally.
+                    </p>
+                </div>
+                
+                <!-- TECH STACK -->
+                <div class="tech-stack">
+                    <h4>Technology Stack</h4>
+                    <div class="tech-items">
+                        <span class="tech-item">Python (FastAPI)</span>
+                        <span class="tech-item">PostgreSQL</span>
+                        <span class="tech-item">Apache Airflow</span>
+                        <span class="tech-item">Groq API</span>
+                        <span class="tech-item">Next.js / React</span>
+                        <span class="tech-item">Vultr (Chicago)</span>
+                        <span class="tech-item">SendGrid</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="footer">
+            <strong>Prepared by Lubo Bali</strong> | January 2026 | Meeting: January 30, 2026
+            <div class="footer-contact">
+                📱 312-358-0008 &nbsp;|&nbsp; 
+                🌐 <a href="https://lubot.ai" target="_blank">LuBot.ai</a> &nbsp;|&nbsp;
+                🌐 <a href="https://lubobali.com" target="_blank">LuboBali.com</a> &nbsp;|&nbsp;
+                📧 <a href="mailto:data@lubobali.com">data@lubobali.com</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+          
